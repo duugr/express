@@ -3,7 +3,9 @@
 /**
  * 顺丰国际SDK，soapClient
  */
-namespace SFEXP;
+namespace EXP;
+
+use Psr\Log\LoggerInterface;
 
 /**
  *
@@ -33,6 +35,7 @@ class Sfexp
 	];
 
 	public $result;
+	private $logger;
 
 	public function __construct($accesscode, $checkword)
 	{
@@ -40,6 +43,11 @@ class Sfexp
 		$this->checkword  = $checkword;
 		set_time_limit(0);
 		$this->xmlArray['Head'] = $this->accesscode;
+	}
+
+	public function SetLogger(LoggerInterface $logger)
+	{
+		$this->logger = $logger;
 	}
 
 	/**
@@ -210,7 +218,7 @@ class Sfexp
 					break;
 
 				default:
-					SfLog::log(['node' => $node], __METHOD__);
+					$this->logger->error(['node' => $node], __METHOD__);
 					break;
 			}
 		}
@@ -219,7 +227,7 @@ class Sfexp
 			$ret['head'] = false;
 		}
 
-		SfLog::log(['xml' => $xml, 'ret' => $ret], __METHOD__);
+		$this->logger->info(['xml' => $xml, 'ret' => $ret], __METHOD__);
 
 		return $ret;
 	}
@@ -229,7 +237,7 @@ class Sfexp
 	 * @param SimpleXMLElement $xml
 	 * @return array
 	 */
-	public function xmlToArray(SimpleXMLElement $xml, $collection = [])
+	public function xmlToArray(\SimpleXMLElement $xml, $collection = [])
 	{
 		$attributes = $xml->attributes();
 		$nodes      = $xml->children();
@@ -330,15 +338,15 @@ class Sfexp
 	private function callWebServer($xml, $verifyCode)
 	{
 		try {
-			SfLog::log(["xml" => $xml, "verifyCode" => $verifyCode], __METHOD__);
-			$client = new SoapClient($this->wsdlnl);
+			$this->logger->info(["xml" => $xml, "verifyCode" => $verifyCode], __METHOD__);
+			$client = new \SoapClient($this->wsdlnl);
 			$result = $client->__soapCall('sfexpressService', ["xml" => $xml, "verifyCode" => $verifyCode]);
 			// sleep(1);
-			SfLog::log($result, __METHOD__);
+			$this->logger->info($result, __METHOD__);
 
 			return $result;
 		} catch (\SoapFault $e) {
-			SfLog::log($e, __METHOD__);
+			$this->logger->error($e, __METHOD__);
 			return false;
 		}
 	}
