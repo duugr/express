@@ -3,14 +3,14 @@
 /**
  * 顺丰国际SDK，soapClient
  */
-namespace EXP;
+namespace Express;
 
 use Psr\Log\LoggerInterface;
 
 /**
  *
  */
-class Sfexp
+class Sf
 {
 	/* 顺丰接口配置 */
 	protected $accesscode = '';                       //商户号码

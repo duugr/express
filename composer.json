@@ -1,5 +1,5 @@
 {
-    "name": "russell/sf-exp",
+    "name": "russell/express",
     "description": "顺丰国际SDK",
     "type": "library",
     "require": {
@@ -20,7 +20,7 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "EXP\\": "src/"
+            "Express\\": "src/"
         }
     }
 }
