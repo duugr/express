@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 class Sf
 {
 	/* 顺丰接口配置 */
-	protected $accesscode = '';                       //商户号码
+	protected $accesscode = ''; //商户号码
 	protected $checkword  = ''; //商户密匙
 	/* 'server'     => 'https://ibse-nginx.sit.sf-express.com:45325/CBTA/ws/sfexpressService?wsdl' //接口地址 */
 	protected $wsdlnl = 'http://ibse-nginx.sit.sf-express.com:45091/CBTA/ws/sfexpressService?wsdl'; //接口地址
@@ -218,7 +218,7 @@ class Sf
 					break;
 
 				default:
-					$this->logger->error(['node' => $node], __METHOD__);
+					$this->logger->error(__METHOD__ . 'xmlToArray not key', ['key' => $key]);
 					break;
 			}
 		}
@@ -227,7 +227,7 @@ class Sf
 			$ret['head'] = false;
 		}
 
-		$this->logger->info(['xml' => $xml, 'ret' => $ret], __METHOD__);
+		$this->logger->info(__METHOD__ . 'xml and ret data', ['xml' => $xml, 'ret' => $ret]);
 
 		return $ret;
 	}
@@ -338,15 +338,15 @@ class Sf
 	private function callWebServer($xml, $verifyCode)
 	{
 		try {
-			$this->logger->info(["xml" => $xml, "verifyCode" => $verifyCode], __METHOD__);
+			$this->logger->info(__METHOD__ . 'callWebServer before', ["xml" => $xml, "verifyCode" => $verifyCode]);
 			$client = new \SoapClient($this->wsdlnl);
 			$result = $client->__soapCall('sfexpressService', ["xml" => $xml, "verifyCode" => $verifyCode]);
 			// sleep(1);
-			$this->logger->info($result, __METHOD__);
+			$this->logger->info(__METHOD__ . 'callWebServer after', [$result]);
 
 			return $result;
 		} catch (\SoapFault $e) {
-			$this->logger->error($e, __METHOD__);
+			$this->logger->error(__METHOD__ . 'callWebServer SoapFault', [$e]);
 			return false;
 		}
 	}
