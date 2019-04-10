@@ -224,7 +224,7 @@ class Sf
 					break;
 
 				default:
-					$this->logger->error(__METHOD__ . 'xmlToArray not key', ['key' => $key]);
+					$this->logger->error(__METHOD__ . ' not key', ['key' => $key]);
 					break;
 			}
 		}
@@ -233,7 +233,7 @@ class Sf
 			$ret['head'] = false;
 		}
 
-		$this->logger->info(__METHOD__ . 'xml and ret data', ['xml' => $xml, 'ret' => $ret]);
+		$this->logger->info(__METHOD__ . ' data', ['xml' => $xml, 'ret' => $ret]);
 
 		return $ret;
 	}
@@ -344,15 +344,15 @@ class Sf
 	private function callWebServer($xml, $verifyCode)
 	{
 		try {
-			$this->logger->info(__METHOD__ . 'callWebServer before', ["xml" => $xml, "verifyCode" => $verifyCode]);
+			$this->logger->info(__METHOD__ . ' before', ["xml" => $xml, "verifyCode" => $verifyCode]);
 			$client = new \SoapClient($this->wsdlnl);
 			$result = $client->__soapCall('sfexpressService', ["xml" => $xml, "verifyCode" => $verifyCode]);
 			// sleep(1);
-			$this->logger->info(__METHOD__ . 'callWebServer after', [$result]);
+			$this->logger->info(__METHOD__ . ' after', [$result]);
 
 			return $result;
 		} catch (\SoapFault $e) {
-			$this->logger->error(__METHOD__ . 'callWebServer SoapFault', [$e]);
+			$this->logger->error(__METHOD__ . ' SoapFault', [$e]);
 			return false;
 		}
 	}
