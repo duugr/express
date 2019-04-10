@@ -131,7 +131,7 @@ class Sf
 	 * 顺丰BSP查单接口,根据运单号或者订单号【1.运单号,2.订单号】
 
 	 */
-	public function RouteSearch($orderid, $type = 1, $lang="")
+	public function RouteSearch($orderid, $type = 1, $lang = "")
 	{
 		if (!empty($lang)) {
 			$this->xmlArray['@attributes']['lang'] = $lang;
@@ -204,6 +204,9 @@ class Sf
 	public function getResponse($name)
 	{
 		$this->EncryptionData();
+		if (!$this->result) {
+			return $this->ret;
+		}
 
 		$ret       = [];
 		$xmlResult = @simplexml_load_string($this->result, 'SimpleXMLElement', LIBXML_NOCDATA | LIBXML_NOBLANKS);
