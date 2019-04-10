@@ -233,7 +233,7 @@ class Sf
 			$ret['head'] = false;
 		}
 
-		$this->logger->info(__METHOD__ . ' data', ['xml' => $xml, 'ret' => $ret]);
+		$this->logger->info(__METHOD__ . ' data', [$ret]);
 
 		return $ret;
 	}
