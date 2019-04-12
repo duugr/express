@@ -15,8 +15,7 @@ class Sf
 	/* 顺丰接口配置 */
 	protected $accesscode = ''; //商户号码
 	protected $checkword  = ''; //商户密匙
-	/* 'server'     => 'https://ibse-nginx.sit.sf-express.com:45325/CBTA/ws/sfexpressService?wsdl' //接口地址 */
-	protected $wsdlnl = 'http://ibse-nginx.sit.sf-express.com:45091/CBTA/ws/sfexpressService?wsdl'; //接口地址
+	protected $wsdlnl     = ''; //接口地址 */
 
 	//返回信息
 	protected $ret = [
@@ -41,6 +40,7 @@ class Sf
 	{
 		$this->accesscode = $accesscode;
 		$this->checkword  = $checkword;
+		$this->wsdlnl = $_SERVER['EXP_SF_URI'];
 		set_time_limit(0);
 		$this->xmlArray['Head'] = $this->accesscode;
 	}
