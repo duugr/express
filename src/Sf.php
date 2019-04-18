@@ -224,7 +224,7 @@ class Sf
 					break;
 
 				default:
-					$this->logger->error(__METHOD__ . ' not key', ['key' => $key]);
+					$this->logger->info(__METHOD__ . ' not key', ['key' => $key]);
 					break;
 			}
 		}
