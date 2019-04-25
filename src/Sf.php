@@ -217,7 +217,7 @@ class Sf
 					$ret['head'] = 'OK' == strtoupper($node['head']);
 					break;
 				case 'body':
-					$ret['data'] = $node[strtolower($name)];
+					$ret['data'] = $node[strtolower($name)] ?? '';
 					break;
 				case 'error':
 					$ret = array_merge($ret, is_array($node) ? $node : []);
