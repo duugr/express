@@ -40,7 +40,7 @@ class Sf
 	{
 		$this->accesscode = $accesscode;
 		$this->checkword  = $checkword;
-		$this->wsdlnl = $_SERVER['EXP_SF_URI'];
+		$this->wsdlnl     = $_SERVER['EXP_SF_URI'];
 		set_time_limit(0);
 		$this->xmlArray['Head'] = $this->accesscode;
 	}
@@ -345,9 +345,22 @@ class Sf
 	{
 		try {
 			$this->logger->info(__METHOD__ . ' before', ["xml" => $xml, "verifyCode" => $verifyCode]);
-			$client = new \SoapClient($this->wsdlnl);
+
+			libxml_disable_entity_loader(false);
+			$opts = [
+				'ssl'   => [
+					'verify_peer' => false
+				],
+				'https' => [
+					'curl_verify_ssl_peer' => false,
+					'curl_verify_ssl_host' => false
+				]
+			];
+			$streamContext = stream_context_create($opts);
+
+			$client = new \SoapClient($this->wsdlnl, ['stream_context' => $streamContext]);
 			$result = $client->__soapCall('sfexpressService', ["xml" => $xml, "verifyCode" => $verifyCode]);
-			// sleep(1);
+
 			$this->logger->info(__METHOD__ . ' after', [$result]);
 
 			return $result;
