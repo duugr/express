@@ -365,7 +365,11 @@ class Sf
 
 			return $result;
 		} catch (\SoapFault $e) {
-			$this->logger->error(__METHOD__ . ' SoapFault', [$e]);
+			$this->logger->error(__METHOD__ . ' SoapFault', [
+				$e,
+				"xml"        => $xml,
+				"verifyCode" => $verifyCode
+			]);
 			return false;
 		}
 	}
