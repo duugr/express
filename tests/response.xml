@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<response>
+    <conent>
+        <routes>
+            <errorDesc>No trace information</errorDesc>
+            <orderId></orderId>
+            <sfWaybillno>994491604995</sfWaybillno>
+            <success>false</success>
+        </routes>
+    </conent>
+    <success>true</success>
+</response>

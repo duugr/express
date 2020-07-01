@@ -6,6 +6,7 @@
 
 namespace Express;
 
+use Express\Util\Http;
 use Express\Util\Xml;
 use Psr\Log\LoggerInterface;
 
@@ -18,7 +19,7 @@ class Sf
 	protected $accesscode = '';             //商户号码
 	protected $checkword  = '';             //商户密匙
 	protected $wsdlnl     = '';             // 接口地址
-	const FuncName        = 'sfKtsService'; // 接口方法 String sfKtsService(String xml, String verifyCode)
+	const FuncName = 'sfKtsService';        // 接口方法 String sfKtsService(String xml, String verifyCode)
 
 	//返回信息
 	protected $ret = [
@@ -36,39 +37,41 @@ class Sf
 		'Body'        => []
 	];
 
-	public $result;
+	public  $result;
 	private $logger;
 
-	public function __construct($accesscode, $checkword, LoggerInterface $logger)
+	public function __construct($accesscode, $checkword)
 	{
 		$this->accesscode = $accesscode;
 		$this->checkword  = $checkword;
-		$this->wsdlnl     = $_SERVER['EXP_SF_URI'];
+		$this->wsdlnl     = $_SERVER['EXP_SF_URI'] ?? 'http://sfapi.trackmeeasy.com/ruserver/api/getRoutes.action';
+		//		$this->wsdlnl     = $_SERVER['EXP_SF_URI'] ?? 'http://kts-api-uat.trackmeeasy.com/webservice/sfexpressService?wsdl';
 		set_time_limit(0);
 		$this->xmlArray['Head'] = $this->accesscode;
 
-		$this->logger = $logger;
+		//		$this->logger = $logger;
 	}
 
 	public function setCreateOrderAttributesOrderId(string $orderId)
 	{
-		$this->xmlArray['Body']['Order']['@attributes']['orderid']           = $orderId;
-		$this->xmlArray['Body']['Order']['@attributes']['platform_order_id'] = $orderId;
-		$this->xmlArray['Body']['Order']['@attributes']['platform_code']     = '0000';
-		$this->xmlArray['Body']['Order']['@attributes']['erp_code']          = '0000';
+		$this->setCreateOrderAttributes('orderid', $orderId);
+		$this->setCreateOrderAttributes('platform_order_id', $orderId);
+		$this->setCreateOrderAttributes('platform_code', '0000');
+		$this->setCreateOrderAttributes('erp_code', '0000');
 	}
 
 	public function setCreateOrderAttributesExpressType(string $expressType = '29', string $orderUrl = '')
 	{
 		$this->xmlArray['Body']['Order']['@attributes']['express_type'] = $expressType;
+		$this->setCreateOrderAttributes('express_type', $expressType);
 		if ('29' === $expressType && !empty($orderUrl)) {
-			$this->xmlArray['Body']['Order']['@attributes']['order_url'] = $orderUrl;
+			$this->setCreateOrderAttributes('order_url', $orderUrl);
 		}
 	}
 
 	public function __call($name, $arguments)
 	{
-		if (method_exists($this, $name)) {
+		if (!method_exists($this, $name)) {
 			if (count($arguments) < 2) {
 				return;
 			}
@@ -92,16 +95,22 @@ class Sf
 				case 'setOrderSearchAttributes':
 					$this->xmlArray['Body']['OrderSearch']['@attributes'][$arguments[0]] = $arguments[1];
 					break;
-				case 'setRouteRequestAttributes':
-					$this->xmlArray['Body']['RouteRequest']['@attributes'][$arguments[0]] = $arguments[1];
+				case 'setNode':
+					$this->xmlArray[$arguments[0]] = $arguments[1];
+					break;
+				case 'setRouteRequestRoute':
+					$this->xmlArray['routes'][$arguments[2]]['route'][$arguments[0]] = $arguments[1];
 					break;
 				default:
-					$this->logger->info(__METHOD__ . ' default ', [$name, $arguments]);
+					print_r([$name, $arguments]);
+				//					$this->logger->info(__METHOD__ . ' default ', [$name, $arguments]);
 			}
 		}
 	}
 
 	/**
+	 * 创建订单
+	 *
 	 * @return array
 	 */
 	public function Create()
@@ -134,21 +143,36 @@ class Sf
 	/**
 	 * 顺丰BSP查单接口,根据运单号或者订单号【1.运单号,2.订单号】
 	 */
-	public function RouteSearch($orderid, $type = 1, $lang = "")
+	public function RouteSearch($orderid, $sfWaybillNo, $lang = '', $platFormCode = '0000')
 	{
-		$this->setBodyAttributes('service', 'RouteService');
-		$this->setRouteRequestAttributes('tracking_number', $orderid);
-		$this->setRouteRequestAttributes('tracking_type', $type);
-		$this->setRouteRequestAttributes('method_type', 1);
-		if (!empty($lang)) {
-			$this->setAttributes('lang', $lang);
-		}
+		$this->xmlArray = [];
+		$this->setNode('language', $lang);
+		$this->setNode('platFormCode', $platFormCode);
 
-		$this->EncryptionData();
+		$this->setRouteRequestRoute('sfWaybillNo', $sfWaybillNo, 0);
+		$this->setRouteRequestRoute('orderId', $orderid, 0);
+
+
+		$xml     = Xml::arrayToXml($this->xmlArray, "request"); // 调用生成XML方法
+		$md5Data = md5($xml . $this->checkword, true);
+		// base64转码
+		$verifyCode = base64_encode($md5Data);
+		var_dump($xml, $verifyCode);
+		$parms = [
+			'logistics_interface' => $xml,
+			'client_code'         => 'erptest',
+			'msg_type'            => 'API_ROUTE_QUERY',
+			'data_digest'         => $verifyCode
+		];
+		$url   = 'http://sfapi.trackmeeasy.com/ruserver/api/getRoutes.action?' . http_build_query($parms);
+
+		$this->result = Http::get($url);
 		if (!$this->result) {
 			return $this->ret;
 		}
-		return $this->getResponse('RouteResponse');
+		$this->result = Xml::toObj($this->result);
+		return $this->result;
+		//		return $this->getResponse('RouteResponse');
 	}
 
 	/**
@@ -226,7 +250,8 @@ class Sf
 					break;
 
 				default:
-					$this->logger->info(__METHOD__ . ' not key', ['key' => $key]);
+					print_r(['key' => $key]);
+					//					$this->logger->info(__METHOD__ . ' not key', ['key' => $key]);
 					break;
 			}
 		}
@@ -235,7 +260,8 @@ class Sf
 			$ret['head'] = false;
 		}
 
-		$this->logger->info(__METHOD__ . ' data', [$ret]);
+		print_r([__METHOD__ => $ret]);
+		//		$this->logger->info(__METHOD__ . ' data', [$ret]);
 
 		return $ret;
 	}
@@ -250,21 +276,22 @@ class Sf
 	private function callWebServer($xml, $verifyCode)
 	{
 		try {
-			$this->logger->info(__METHOD__ . ' before', ["xml" => $xml, "verifyCode" => $verifyCode]);
+			//			$this->logger->info(__METHOD__ . ' before', ["xml" => $xml, "verifyCode" => $verifyCode]);
 
 			$client = new \SoapClient($this->wsdlnl);
 			$result = $client->__soapCall(self::FuncName, ["xml" => $xml, "verifyCode" => $verifyCode]);
 			// sleep(1);
-			$this->logger->info(__METHOD__ . ' after', [$result]);
-
+			//			$this->logger->info(__METHOD__ . ' after', [$result]);
+			print_r($result);
 			return $result;
 		} catch (\SoapFault $e) {
-			$this->logger->error(
-				__METHOD__ . ' SoapFault', [
-					$e,
-					"xml"        => $xml,
-					"verifyCode" => $verifyCode
-				]);
+			//			$this->logger->error(
+			//				__METHOD__ . ' SoapFault', [
+			//				$e,
+			//				"xml"        => $xml,
+			//				"verifyCode" => $verifyCode
+			//			]);
+			print_r($e);
 			return false;
 		}
 	}
@@ -281,7 +308,7 @@ class Sf
 		$md5Data = md5($xml . $this->checkword, true);
 		// base64转码
 		$verifyCode = base64_encode($md5Data);
-
-		$this->result = $this->callWebServer($xml, $verifyCode); // 调用webserver
+		var_dump($xml, $verifyCode);
+		//		$this->result = $this->callWebServer($xml, $verifyCode); // 调用webserver
 	}
 }
