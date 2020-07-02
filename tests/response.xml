@@ -7,6 +7,36 @@
             <sfWaybillno>994491604995</sfWaybillno>
             <success>false</success>
         </routes>
+        <routes>
+            <orderId>test002</orderId>
+            <sfWaybillno>560600013557</sfWaybillno>
+            <success>false</success>
+            <errorDesc>The 'platFormCode'/'sfWaybillNo' and the 'orderId' don't match</errorDesc>
+        </routes>
+        <routes>
+            <orderId>test001</orderId>
+            <sfTrackingNo>560600013566</sfTrackingNo>
+            <proxyWaybillNo>RA020100440FI</proxyWaybillNo>
+            <jCountry>CN</jCountry>
+            <dCountry>US</dCountry>
+            <route>
+                <barCode>K50</barCode>
+                <city>SHEN ZHEN</city>
+                <desc>【SHEN ZHEN】 S.F. Express has picked up the shipment</desc>
+                <oprDate>2017-10-20 12:41:23</oprDate>
+                <reasonCode></reasonCode>
+            </route>
+            <route>
+                <barCode>K09</barCode>
+                <city>MOW01AB</city>
+                <desc>【MOW01AB】 Delivered. Thank you for using SF Express. Looking forward to serving you again</desc>
+                <oprDate>2017-12-28 15:23:51</oprDate>
+                <reasonCode></reasonCode>
+            </route>
+            <sfWaybillno>560600013566</sfWaybillno>
+            <success>true</success>
+        </routes>
+
     </conent>
     <success>true</success>
 </response>
