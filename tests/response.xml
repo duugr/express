@@ -39,4 +39,8 @@
 
     </conent>
     <success>true</success>
+    <error>
+        <errorCode>S01</errorCode>
+        <errorMsg>Secret key is error</errorMsg>
+    </error>
 </response>
