@@ -44,7 +44,7 @@ class Sf
 	{
 		$this->accesscode = $accesscode;
 		$this->checkword  = $checkword;
-		$this->wsdlnl     = $_SERVER['EXP_SF_URI'] ?? 'http://kts-api-uat.trackmeeasy.com/webservice/sfexpressService?wsdl';
+		$this->wsdlnl     = $_SERVER['EXP_KTS_URI'] ?? 'http://kts-api-uat.trackmeeasy.com/webservice/sfexpressService?wsdl';
 		set_time_limit(0);
 		$this->xmlArray['Head'] = $this->accesscode;
 
@@ -83,7 +83,7 @@ class Sf
 					$this->xmlArray['Body']['Order']['Cargo']['@attributes'][$arguments[0]] = $arguments[1];
 					break;
 				case 'setCreateOrderExtraAttributes':
-					$this->xmlArray['Body']['@attributes'][$arguments[0]] = $arguments[1];
+					$this->xmlArray['Body']['Order']['Extra']['@attributes'][$arguments[0]] = $arguments[1];
 					break;
 				case 'setAttributes':
 					$this->xmlArray['@attributes'][$arguments[0]] = $arguments[1];
@@ -113,7 +113,7 @@ class Sf
 	 */
 	public function Create()
 	{
-		$this->setBodyAttributes('service', 'OrderService');
+		$this->setAttributes('service', 'OrderService');
 
 		$this->EncryptionData();
 		if (!$this->result) {
@@ -283,7 +283,7 @@ class Sf
 	private function callWebServer($xml, $verifyCode)
 	{
 		try {
-			$this->logger->info(__METHOD__ . ' before', ["xml" => $xml, "verifyCode" => $verifyCode]);
+			$this->logger->info(__METHOD__ . ' before', ['wsdl'=>$this->wsdlnl, "xml" => $xml, "verifyCode" => $verifyCode]);
 
 			$client = new \SoapClient($this->wsdlnl);
 			$result = $client->__soapCall(self::FuncName, ["xml" => $xml, "verifyCode" => $verifyCode]);
