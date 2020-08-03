@@ -148,31 +148,30 @@ class Sf
 	 *
 	 * @return array|mixed
 	 */
-	public function RouteSearch($orderid, $sfWaybillNo, $lang = '', $platFormCode = '0000')
+	public function RouteSearch($clientCode, $orderId, $sfWaybillNo, $lang = '', $platFormCode = '0000')
 	{
 		$this->xmlArray = [];
 		$this->setNode('language', $lang);
 		$this->setNode('platFormCode', $platFormCode);
 
 		$this->setRouteRequestRoute('sfWaybillNo', $sfWaybillNo, 0);
-		$this->setRouteRequestRoute('orderId', $orderid, 0);
+		$this->setRouteRequestRoute('orderId', $orderId, 0);
 
 
 		$xml     = Xml::arrayToXml($this->xmlArray, "request"); // 调用生成XML方法
 		$md5Data = md5($xml . $this->checkword, true);
 		// base64转码
 		$verifyCode = base64_encode($md5Data);
-		var_dump($xml, $verifyCode);
 		$parms = [
 			'logistics_interface' => $xml,
-			'client_code'         => 'erptest',
+			'client_code'         => $clientCode,
 			'msg_type'            => 'API_ROUTE_QUERY',
 			'data_digest'         => $verifyCode
 		];
 		$url   = 'http://sfapi.trackmeeasy.com/ruserver/api/getRoutes.action?' . http_build_query($parms);
 
 		$this->logger->info(
-			__METHOD__ . __LINE__, [
+			__METHOD__ .': '. __LINE__, [
 			'url'   => $url,
 			'parms' => $parms
 		]);
