@@ -148,7 +148,7 @@ class Sf
 	 *
 	 * @return array|mixed
 	 */
-	public function RouteSearch($clientCode, $orderId, $sfWaybillNo, $lang = '', $platFormCode = '0000')
+	public function RouteSearch($orderId, $sfWaybillNo, $lang = '', $platFormCode = '0000')
 	{
 		$this->xmlArray = [];
 		$this->setNode('language', $lang);
@@ -164,7 +164,7 @@ class Sf
 		$verifyCode = base64_encode($md5Data);
 		$parms = [
 			'logistics_interface' => $xml,
-			'client_code'         => $clientCode,
+			'client_code'         => $this->accesscode,
 			'msg_type'            => 'API_ROUTE_QUERY',
 			'data_digest'         => $verifyCode
 		];
