@@ -9,6 +9,7 @@ namespace Express;
 use Express\Util\Http;
 use Express\Util\Xml;
 use Psr\Log\LoggerInterface;
+use Spatie\ArrayToXml\ArrayToXml;
 
 /**
  *
@@ -49,6 +50,11 @@ class Sf
 		$this->xmlArray['Head'] = $this->accesscode;
 
 		$this->logger = $logger;
+	}
+
+	public function getXml()
+	{
+		return $this->xmlArray;
 	}
 
 	public function setCreateOrderAttributesOrderId(string $orderId)
@@ -98,18 +104,21 @@ class Sf
 					$this->xmlArray[$arguments[0]] = $arguments[1];
 					break;
 				case 'setRouteRequestRoute':
-					$this->xmlArray['routes'][$arguments[2]]['route'][$arguments[0]] = $arguments[1];
+					$this->xmlArray['routes']['route'][$arguments[2]][$arguments[0]] = $arguments[1];
 					break;
 				default:
-					$this->logger->info(__METHOD__ . ' default ', [$name, $arguments]);
+					$this->logger->info(__METHOD__.' default ', [$name, $arguments]);
 			}
 		}
 	}
 
-	public function resetXmlEmpty() {
+	public function resetXmlEmpty()
+	{
 		$this->xmlArray = [];
 	}
-	public function resetXmlDefault() {
+
+	public function resetXmlDefault()
+	{
 		$this->xmlArray = [
 			'@attributes' => [
 				'service' => '',
@@ -164,23 +173,23 @@ class Sf
 	 */
 	public function RouteSearch()
 	{
-		if(empty($this->xmlArray) || !isset($this->xmlArray['platFormCode'])) {
-			$this->logger->error(__METHOD__ .': '. __LINE__.' 请求报文错误。', $this->xmlArray);
+		if (empty($this->xmlArray) || !isset($this->xmlArray['platFormCode'])) {
+			$this->logger->error(__METHOD__.': '.__LINE__.' 请求报文错误。', $this->xmlArray);
 		}
-		$xml     = Xml::arrayToXml($this->xmlArray, "request"); // 调用生成XML方法
-		$md5Data = md5($xml . $this->checkword, true);
+		$xml = ArrayToXml::convert($this->xmlArray, 'request');
+		$md5Data = md5($xml.$this->checkword, true);
 		// base64转码
 		$verifyCode = base64_encode($md5Data);
-		$parms = [
+		$parms      = [
 			'logistics_interface' => $xml,
 			'client_code'         => $this->accesscode,
 			'msg_type'            => 'API_ROUTE_QUERY',
 			'data_digest'         => $verifyCode
 		];
-		$url   = 'http://sfapi.trackmeeasy.com/ruserver/api/getRoutes.action?' . http_build_query($parms);
+		$url        = 'http://sfapi.trackmeeasy.com/ruserver/api/getRoutes.action?'.http_build_query($parms);
 
 		$this->logger->info(
-			__METHOD__ .': '. __LINE__, [
+			__METHOD__.': '.__LINE__, [
 			'url'   => $url,
 			'parms' => $parms
 		]);
@@ -209,7 +218,7 @@ class Sf
 	 * 取消订单
 	 *
 	 * @param        $orderid
-	 * @param string $mailno
+	 * @param  string  $mailno
 	 *
 	 * @return array|bool
 	 */
@@ -267,7 +276,7 @@ class Sf
 					break;
 
 				default:
-					$this->logger->info(__METHOD__ . ' not key', ['key' => $key]);
+					$this->logger->info(__METHOD__.' not key', ['key' => $key]);
 					break;
 			}
 		}
@@ -276,7 +285,7 @@ class Sf
 			$ret['head'] = false;
 		}
 
-		$this->logger->info(__METHOD__ . ' data', [$ret]);
+		$this->logger->info(__METHOD__.' data', [$ret]);
 
 		return $ret;
 	}
@@ -291,16 +300,16 @@ class Sf
 	private function callWebServer($xml, $verifyCode)
 	{
 		try {
-			$this->logger->info(__METHOD__ . ' before', ['wsdl'=>$this->wsdlnl, "xml" => $xml, "verifyCode" => $verifyCode]);
+			$this->logger->info(__METHOD__.' before', ['wsdl' => $this->wsdlnl, "xml" => $xml, "verifyCode" => $verifyCode]);
 
 			$client = new \SoapClient($this->wsdlnl);
 			$result = $client->__soapCall(self::FuncName, ["xml" => $xml, "verifyCode" => $verifyCode]);
 			// sleep(1);
-			$this->logger->info(__METHOD__ . ' after', [$result]);
+			$this->logger->info(__METHOD__.' after', [$result]);
 			return $result;
 		} catch (\SoapFault $e) {
 			$this->logger->error(
-				__METHOD__ . ' SoapFault', [
+				__METHOD__.' SoapFault', [
 				$e,
 				"xml"        => $xml,
 				"verifyCode" => $verifyCode
@@ -318,7 +327,7 @@ class Sf
 	public function EncryptionData()
 	{
 		$xml     = Xml::arrayToXml($this->xmlArray, "Request"); // 调用生成XML方法
-		$md5Data = md5($xml . $this->checkword, true);
+		$md5Data = md5($xml.$this->checkword, true);
 		// base64转码
 		$verifyCode   = base64_encode($md5Data);
 		$this->result = $this->callWebServer($xml, $verifyCode); // 调用webserver
