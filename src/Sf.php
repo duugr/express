@@ -106,6 +106,20 @@ class Sf
 		}
 	}
 
+	public function resetXmlEmpty() {
+		$this->xmlArray = [];
+	}
+	public function resetXmlDefault() {
+		$this->xmlArray = [
+			'@attributes' => [
+				'service' => '',
+				'lang'    => 'zh_CN'
+			],
+			'Head'        => "",
+			'Body'        => []
+		];
+	}
+
 	/**
 	 * 创建订单
 	 *
@@ -148,16 +162,11 @@ class Sf
 	 *
 	 * @return array|mixed
 	 */
-	public function RouteSearch($orderId, $sfWaybillNo, $lang = '', $platFormCode = '0000')
+	public function RouteSearch()
 	{
-		$this->xmlArray = [];
-		$this->setNode('language', $lang);
-		$this->setNode('platFormCode', $platFormCode);
-
-		$this->setRouteRequestRoute('sfWaybillNo', $sfWaybillNo, 0);
-		$this->setRouteRequestRoute('orderId', $orderId, 0);
-
-
+		if(empty($this->xmlArray) || !isset($this->xmlArray['platFormCode'])) {
+			$this->logger->error(__METHOD__ .': '. __LINE__.' 请求报文错误。', $this->xmlArray);
+		}
 		$xml     = Xml::arrayToXml($this->xmlArray, "request"); // 调用生成XML方法
 		$md5Data = md5($xml . $this->checkword, true);
 		// base64转码
