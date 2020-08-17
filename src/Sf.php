@@ -202,6 +202,16 @@ class Sf
 	}
 
 	/**
+	 * 顺丰面单接口
+	 */
+	public function label($params)
+	{
+		$params['username'] = $this->accesscode;
+		$params['signature'] = base64_encode(md5($this->accesscode+$this->checkword));
+
+	}
+
+	/**
 	 * 确认订单
 	 *
 	 * @param $orderid
