@@ -1,11 +1,18 @@
 <?php
-//require dirname(__DIR__).'/bootstrap.php';
-require dirname(__DIR__).'/vendor/autoload.php';
+require dirname(__DIR__).'/bootstrap.php';
+//require dirname(__DIR__).'/vendor/autoload.php';
 
 use Express\Sf;
 
 
-$exp = new Sf('erptest', 'F738470712F5F54681FB5E5A9779272D', null);
+
+$params['mailno']     = implode(",", []);
+$params['orderid']    = implode(",", []);
+$params['onepdf']     = $parameters['onepdf'] ?? true;
+$params['jianhuodan'] = $parameters['jianhuodan'] ?? false;
+
+var_dump($exp->label($params));
+die;
 
 $arg1 = 'abc';
 $arg2 = '123';
