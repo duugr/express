@@ -22,6 +22,8 @@ class Sf
 	protected $wsdlnl     = '';             // 接口地址
 	const FuncName = 'sfKtsService';        // 接口方法 String sfKtsService(String xml, String verifyCode)
 
+	public const LabelUrl = 'http://sfapi.trackmeeasy.com/ruserver/api/getLabelUrl.action';
+
 	//返回信息
 	protected $ret = [
 		'head'  => false,
@@ -207,8 +209,9 @@ class Sf
 	public function label($params)
 	{
 		$params['username'] = $this->accesscode;
-		$params['signature'] = base64_encode(md5($this->accesscode+$this->checkword));
+		$params['signature'] = base64_encode(md5($this->accesscode.$this->checkword));
 
+		return Http::post(self::LabelUrl, $params);
 	}
 
 	/**
